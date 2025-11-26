@@ -1,6 +1,6 @@
 # BinVis - Magnetic Binary Visualizer
 
-**BinVis** is a modern, interactive Linux desktop application for reverse engineering and visualizing the control flow of ELF binaries. It uses a "magnetic" force-directed graph layout to organize function calls dynamically, providing an intuitive way to explore software architecture and logic.
+**BinVis** is a modern, interactive Linux desktop application for reverse engineering and visualizing the control flow of ELF binaries. It uses a "magnetic" force-directed graph layout to organize function calls dynamically, providing an intuitive way to explore software architecture and logic. Recent updates include a powerful GDB-based debugger and AI integration for advanced analysis.
 
 ## Features
 
@@ -11,15 +11,25 @@
     *   **Zoom & Pan:** Navigate large graphs easily.
     *   **Directional Arrows:** Visual indication of caller/callee relationships.
 *   **Binary Analysis:**
-    *   **ELF Parsing:** Extracts function symbols and PLT entries.
+    *   **ELF/PE Parsing:** Extracts function symbols, PLT/GOT entries.
     *   **Disassembly:** Integrates `Capstone` engine to show x86-64 assembly code.
     *   **Pseudo-Decompiler:** Heuristic-based translator converting assembly to simplified C-like logic.
     *   **Imports/PLT:** Lists external dependencies and their addresses.
+*   **Debugger Features:**
+    *   Seamless **GDB Integration** for dynamic analysis.
+    *   **Execution Control:** Step Into (si), Step Over (ni), Continue.
+    *   **Real-time State View:** Displays Registers and Stack.
+    *   **Optimized Performance:** Utilizes GDB/MI (Machine Interface) commands for faster communication.
+    *   **Smart Updates:** Features disassembly caching, incremental register updates, and lazy stack updates to ensure high responsiveness even when rapidly stepping through code.
+*   **AI Integration:**
+    *   Leverages **Google Gemini API** for enhanced analysis.
+    *   **Function Summaries:** Get AI-generated explanations of individual functions.
+    *   **Binary Overviews:** Request high-level summaries and likely purpose of the loaded binary.
 *   **Modern UI:**
     *   Built with **PyQt6**.
     *   Dark theme with syntax highlighting.
-    *   Tabbed interface for Info, Disassembly, Decompiler, and Imports.
-    *   **Split View:** Adjustable 40/60 split between analysis tools and the visual graph.
+    *   Tabbed interface for Info, Disassembly, Decompiler, Imports, Debugger, and AI Controls.
+    *   **Split View:** Adjustable layout between analysis tools and the visual graph.
     *   **Navigation:** Double-click function names in the decompiler to jump to their graph nodes.
 
 ## Installation
@@ -27,6 +37,8 @@
 ### Prerequisites
 *   Python 3.8+
 *   Linux (tested on Kali Linux)
+*   `gdb` (GNU Debugger) must be installed and in your system's PATH for debugger features.
+*   For AI features, you will need a Google Gemini API Key. You can set it as an environment variable `GEMINI_API_KEY` or enter it in the UI.
 
 ### Setup
 1.  Clone the repository (or download source).
@@ -37,7 +49,7 @@
     ```
 3.  Install dependencies:
     ```bash
-    pip install PyQt6 pyelftools capstone networkx
+    pip install PyQt6 pyelftools capstone networkx pygdbmi google-generativeai pefile
     ```
 
 ## Usage
@@ -53,14 +65,17 @@
     *   **Left Click** a node to select it.
     *   **Right Click & Drag** to pan the view.
     *   **Scroll** to zoom.
-    *   Use the **tabs** on the left to view details, assembly, or pseudo-code.
+    *   Use the **tabs** on the left to view details, assembly, pseudo-code, interact with the debugger, or use AI analysis.
 
 ## Project Structure
 
 *   `BinVis/main.py`: Entry point and main UI logic.
-*   `BinVis/binary_analyzer.py`: Core backend for parsing ELF files and disassembling code.
+*   `BinVis/binary_analyzer.py`: Core backend for parsing ELF/PE files and disassembling code.
 *   `BinVis/graph_engine.py`: Physics engine for the force-directed graph layout.
+*   `BinVis/debugger.py`: GDB interaction backend, handling execution control and data retrieval.
 *   `BinVis/ui/graph_widget.py`: Custom PyQt6 widget for rendering the graph.
+*   `BinVis/ui/debugger_widget.py`: PyQt6 GUI component for the debugger.
+*   `BinVis/ui/ai_widget.py`: PyQt6 GUI component for Gemini AI integration.
 *   `BinVis/ui/splash.py`: Startup splash screen.
 
 ## Testing

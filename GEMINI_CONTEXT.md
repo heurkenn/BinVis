@@ -33,7 +33,7 @@ The project follows a modular structure separating the UI, analysis backend, ren
 *   **`BinVis/debugger.py`**:
     *   **Class:** `DebuggerBackend`
     *   **Library:** `pygdbmi` (Machine Interface for GDB).
-    *   **Role:** Manages the GDB subprocess. Handles Start/Stop, Stepping (Into/Over), and state retrieval (Registers, Stack, Disassembly context).
+    *   **Role:** Manages the GDB subprocess. Handles Start/Stop, Stepping (Into/Over). Optimized for fast state retrieval (registers, stack, disassembly) using GDB/MI commands and intelligent caching.
 
 ### 2. UI Components (`BinVis/ui/`)
 *   **`graph_widget.py`**: High-performance graph rendering using `QPainter`.
@@ -45,7 +45,7 @@ The project follows a modular structure separating the UI, analysis backend, ren
     *   **Static Analysis:** Loading ELF x86-64 and basic PE binaries.
     *   **Visualization:** Interactive CFG with physics (Zoom/Pan/Drag).
     *   **Views:** Disassembly, Pseudo-Decompiler, Imports.
-    *   **Debugger:** Fully functional GDB frontend (Stepping, Registers, Stack, Highlighting active line).
+    *   **Debugger:** High-performance GDB frontend with features like disassembly caching, incremental register updates, and lazy stack updates for optimal responsiveness.
     *   **AI Integration:** Can query Gemini models to explain functions or summarize the binary.
     *   **Theming:** Dark/Light mode support.
 
