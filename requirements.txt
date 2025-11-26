@@ -1,0 +1,6 @@
+capstone==5.0.6
+networkx==3.6
+pyelftools==0.32
+PyQt6==6.10.0
+PyQt6-Qt6==6.10.0
+PyQt6_sip==13.10.2
