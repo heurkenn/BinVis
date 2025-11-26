@@ -27,6 +27,7 @@ class GraphWidget(QWidget):
         
         # Interaction
         self.dragging_node = None
+        self.active_node = None # For focusing
         self.panning = False
         self.last_mouse_pos = QPointF()
         
@@ -111,24 +112,31 @@ class GraphWidget(QWidget):
         painter.setFont(font)
         
         for node in self.engine.nodes.values():
-            # Determine color (maybe highlight if connected?)
-            brush = QBrush(self.node_color)
+            # Determine color
+            is_active = (node.uid == self.active_node)
+            
+            if is_active:
+                brush = QBrush(QColor("#4caf50")) # Green
+                current_radius = self.node_radius * 1.5
+            else:
+                brush = QBrush(self.node_color)
+                current_radius = self.node_radius
+
             painter.setBrush(brush)
             painter.setPen(Qt.PenStyle.NoPen)
             
             # Draw Circle
-            rect = QRectF(node.x - self.node_radius, node.y - self.node_radius, 
-                          self.node_radius * 2, self.node_radius * 2)
+            rect = QRectF(node.x - current_radius, node.y - current_radius, 
+                          current_radius * 2, current_radius * 2)
             painter.drawEllipse(rect)
             
             # Draw Text
             painter.setPen(self.node_text_color)
             # Draw centered text (simplified)
-            # For better visibility, maybe draw text outside or on top
-            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, node.label[:4]) # Short label inside
+            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, node.label[:4]) 
             
             # Full label below
-            painter.drawText(QRectF(node.x - 50, node.y + self.node_radius + 2, 100, 20), 
+            painter.drawText(QRectF(node.x - 50, node.y + current_radius + 2, 100, 20), 
                              Qt.AlignmentFlag.AlignCenter, node.label)
 
     def mousePressEvent(self, event):
@@ -150,8 +158,10 @@ class GraphWidget(QWidget):
                 dy = world_pos.y() - node.y
                 if math.sqrt(dx*dx + dy*dy) <= self.node_radius:
                     self.dragging_node = node
+                    self.active_node = node.uid # Set active but DONT CENTER
                     self.setCursor(Qt.CursorShape.PointingHandCursor)
                     self.nodeClicked.emit(node.uid)
+                    self.update() # Redraw for color change
                     return
 
     def mouseMoveEvent(self, event):
@@ -199,3 +209,19 @@ class GraphWidget(QWidget):
         wx = (screen_pos.x() - center_x - self.offset_x) / self.scale
         wy = (screen_pos.y() - center_y - self.offset_y) / self.scale
         return QPointF(wx, wy)
+
+    def center_on_node(self, node_uid):
+        """Focuses the camera on the specified node."""
+        node = self.engine.nodes.get(node_uid)
+        if node:
+            self.active_node = node_uid # Set active
+            
+            # We want node world pos (nx, ny) to be at screen center (0, 0 relative to offset)
+            # screen_x = (world_x * scale) + offset_x + center_x
+            # If screen_x == center_x, then:
+            # 0 = (world_x * scale) + offset_x
+            # offset_x = -(world_x * scale)
+            
+            self.offset_x = -(node.x * self.scale)
+            self.offset_y = -(node.y * self.scale)
+            self.update()

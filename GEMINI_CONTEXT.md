@@ -3,61 +3,68 @@
 This file is intended for future AI agents (Gemini or others) to quickly understand the state of the **BinVis** project and resume development efficiently.
 
 ## Project Overview
-**BinVis** is a Python-based GUI tool for visualizing the control flow of Linux ELF executables. It combines static analysis (ELF parsing, disassembly) with a dynamic, force-directed graph visualization.
+**BinVis** is a Python-based GUI tool for visualizing the control flow of binaries (ELF & PE). It combines static analysis (parsing, disassembly) with a dynamic, force-directed graph visualization.
+Recent updates have added a **GDB-based Debugger** and **Generative AI integration** for automated code analysis.
 
 ## Architecture
-The project follows a modular structure separating the UI, analysis backend, and rendering engine.
+The project follows a modular structure separating the UI, analysis backend, rendering engine, and external integrations.
 
 ### 1. Core Components
 *   **`BinVis/main.py`**:
     *   **Class:** `MainWindow`
-    *   **Role:** Orchestrates the application. Manages the `QSplitter` layout (Left: Tabs, Right: Graph), handles file loading, and connects UI signals (like node clicks) to updates in the tabs.
-    *   **Key Feature:** `ClickableTextEdit` class implements double-click navigation in the Decompiler tab.
+    *   **Role:** Orchestrates the application. Manages a `QSplitter` layout with a Tabbed Left Panel (Info, ASM, Decomp, Imports, Debug, AI) and a Tabbed Right Panel (Graph, AI Results).
+    *   **Features:** Handles file loading (ELF/PE), signals between widgets, and theming.
 
 *   **`BinVis/binary_analyzer.py`**:
     *   **Class:** `BinaryAnalyzer`
-    *   **Libraries:** `pyelftools` (ELF parsing), `capstone` (Disassembly), `networkx` (Graph structure).
+    *   **Libraries:** `pyelftools` (ELF), `pefile` (PE), `capstone` (Disassembly), `networkx` (Graph).
     *   **Role:**
-        1.  Extracts function symbols from `.symtab`.
-        2.  Extracts PLT/GOT imports from `.rela.plt` / `.dynsym`.
-        3.  Disassembles `.text` section to find `call` instructions.
-        4.  Builds a `networkx.DiGraph` where nodes are functions and edges are calls.
-        5.  **Decompilation:** `_simple_decompile` provides a heuristic, regex-like translation of ASM to Pseudo-C.
+        1.  Detects format (ELF/PE).
+        2.  Extracts symbols, imports, and entry points.
+        3.  Disassembles `.text` (or equivalent) to find control flow.
+        4.  Builds the Control Flow Graph (CFG).
+        5.  **Decompilation:** `_simple_decompile` provides heuristic ASM-to-C translation.
 
 *   **`BinVis/graph_engine.py`**:
-    *   **Class:** `GraphEngine` & `Node`
-    *   **Role:** Implements a custom physics simulation (Force-Directed Layout) independent of the rendering library.
-    *   **Physics:** Nodes have repulsion; connected edges have spring attraction; global center gravity.
-    *   **Data:** Maintains `incoming` and `outgoing` adjacency lists for O(1) lookup.
+    *   **Class:** `GraphEngine`
+    *   **Role:** Implements custom physics simulation (Force-Directed Layout).
+    *   **Physics:** Repulsion/Attraction model independent of rendering.
 
-*   **`BinVis/ui/graph_widget.py`**:
-    *   **Class:** `GraphWidget` (inherits `QWidget`)
-    *   **Role:** High-performance custom rendering using `QPainter`.
-    *   **Features:** 60FPS timer for physics, coordinate transformation (World <-> Screen), zoom/pan logic, arrow drawing.
+*   **`BinVis/debugger.py`**:
+    *   **Class:** `DebuggerBackend`
+    *   **Library:** `pygdbmi` (Machine Interface for GDB).
+    *   **Role:** Manages the GDB subprocess. Handles Start/Stop, Stepping (Into/Over), and state retrieval (Registers, Stack, Disassembly context).
+
+### 2. UI Components (`BinVis/ui/`)
+*   **`graph_widget.py`**: High-performance graph rendering using `QPainter`.
+*   **`debugger_widget.py`**: GUI for the debugger. Displays registers, stack, and highlighted disassembly.
+*   **`ai_widget.py`**: Interface for Google's Gemini API (`google-generativeai`). Allows sending function ASM or binary summaries for AI analysis.
 
 ## Current Status (as of Nov 26, 2025)
 *   **Working:**
-    *   Loading ELF x86-64 binaries.
-    *   Visualizing call graphs with physics.
-    *   Full interaction (Zoom, Pan, Drag).
-    *   Disassembly view (Capstone integration).
-    *   Imports view (PLT extraction).
-    *   Pseudo-Decompiler with navigation (Double-click function names to jump).
-    *   Dark UI theme.
+    *   **Static Analysis:** Loading ELF x86-64 and basic PE binaries.
+    *   **Visualization:** Interactive CFG with physics (Zoom/Pan/Drag).
+    *   **Views:** Disassembly, Pseudo-Decompiler, Imports.
+    *   **Debugger:** Fully functional GDB frontend (Stepping, Registers, Stack, Highlighting active line).
+    *   **AI Integration:** Can query Gemini models to explain functions or summarize the binary.
+    *   **Theming:** Dark/Light mode support.
 
 *   **Limitations / Future Work:**
-    *   **Arch Support:** Currently hardcoded for `x86-64`. Needs expansion for ARM/MIPS in `BinaryAnalyzer`.
-    *   **Decompiler:** The `_simple_decompile` is very basic (text substitution). Integration with a real decompiler (like Ghidra headless or R2) would be a major upgrade.
-    *   **Large Binaries:** The O(N^2) physics loop in `GraphEngine` might slow down with >500 nodes. Optimization (Quadtree or Barnes-Hut) needed for large binaries.
-    *   **Stripped Binaries:** Relies heavily on `.symtab`. Needs heuristics/signature matching for stripped binaries.
+    *   **Arch Support:** Architecture support logic exists but rigorous testing on ARM/MIPS is needed.
+    *   **Debugger:** Relies on system `gdb`. Needs to ensure `gdb` is in PATH or bundled. Currently assumes x86-like register names for display in some parts.
+    *   **Large Binaries:** Physics engine O(N^2) loop needs optimization (Quadtree) for >500 nodes.
+    *   **Stripped Binaries:** Heuristics for stripped binaries are basic.
 
 ## Conventions used
 *   **UI Framework:** PyQt6.
-*   **Graph Lib:** NetworkX (for structure), Custom (for layout/physics).
+*   **Graph Lib:** NetworkX (structure), Custom (layout).
+*   **Debugger Lib:** pygdbmi.
+*   **AI Lib:** google-generativeai.
 *   **Code Style:** Standard Python PEP8.
 *   **Pathing:** Absolute imports rooted at `BinVis/`.
 
 ## How to Resume
-1.  **Check Dependencies:** Ensure `PyQt6`, `pyelftools`, `capstone`, `networkx` are installed.
-2.  **Run:** Execute `BinVis/main.py` to verify the current state.
-3.  **Debug:** Use the `BinVis/spaghetti.c` -> `BinVis/spaghetti_bin` for quick iteration on graph logic.
+1.  **Check Dependencies:** `pip install -r BinVis/requirements.txt` (includes `pygdbmi`, `pefile`, `google-generativeai`).
+2.  **System Req:** Ensure `gdb` is installed on the system for debugging features.
+3.  **Run:** `python BinVis/main.py`
+4.  **AI Setup:** Set `GEMINI_API_KEY` env var or enter it in the UI to use AI features.
