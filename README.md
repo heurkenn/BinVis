@@ -44,11 +44,11 @@
 
 1.  **Launch the Application:**
     ```bash
-    python binvis/main.py
+    python BinVis/main.py
     ```
 2.  **Open a Binary:**
     *   Click **File -> Open Binary** (or `Ctrl+O`).
-    *   Select an unstripped ELF executable (e.g., `binvis/spaghetti_bin`).
+    *   Select an unstripped ELF executable (e.g., `BinVis/spaghetti_bin`).
 3.  **Explore:**
     *   **Left Click** a node to select it.
     *   **Right Click & Drag** to pan the view.
@@ -57,17 +57,17 @@
 
 ## Project Structure
 
-*   `binvis/main.py`: Entry point and main UI logic.
-*   `binvis/binary_analyzer.py`: Core backend for parsing ELF files and disassembling code.
-*   `binvis/graph_engine.py`: Physics engine for the force-directed graph layout.
-*   `binvis/ui/graph_widget.py`: Custom PyQt6 widget for rendering the graph.
-*   `binvis/ui/splash.py`: Startup splash screen.
+*   `BinVis/main.py`: Entry point and main UI logic.
+*   `BinVis/binary_analyzer.py`: Core backend for parsing ELF files and disassembling code.
+*   `BinVis/graph_engine.py`: Physics engine for the force-directed graph layout.
+*   `BinVis/ui/graph_widget.py`: Custom PyQt6 widget for rendering the graph.
+*   `BinVis/ui/splash.py`: Startup splash screen.
 
 ## Testing
 A test binary with "spaghetti code" logic is included for demonstration:
 ```bash
 # Compile the test binary
-gcc -g -no-pie -fno-inline binvis/spaghetti.c -o binvis/spaghetti_bin
+gcc -g -no-pie -fno-inline BinVis/spaghetti.c -o BinVis/spaghetti_bin
 
-# Run BinVis and load 'binvis/spaghetti_bin'
+# Run BinVis and load 'BinVis/spaghetti_bin'
 ```

@@ -9,12 +9,12 @@ This file is intended for future AI agents (Gemini or others) to quickly underst
 The project follows a modular structure separating the UI, analysis backend, and rendering engine.
 
 ### 1. Core Components
-*   **`binvis/main.py`**:
+*   **`BinVis/main.py`**:
     *   **Class:** `MainWindow`
     *   **Role:** Orchestrates the application. Manages the `QSplitter` layout (Left: Tabs, Right: Graph), handles file loading, and connects UI signals (like node clicks) to updates in the tabs.
     *   **Key Feature:** `ClickableTextEdit` class implements double-click navigation in the Decompiler tab.
 
-*   **`binvis/binary_analyzer.py`**:
+*   **`BinVis/binary_analyzer.py`**:
     *   **Class:** `BinaryAnalyzer`
     *   **Libraries:** `pyelftools` (ELF parsing), `capstone` (Disassembly), `networkx` (Graph structure).
     *   **Role:**
@@ -24,13 +24,13 @@ The project follows a modular structure separating the UI, analysis backend, and
         4.  Builds a `networkx.DiGraph` where nodes are functions and edges are calls.
         5.  **Decompilation:** `_simple_decompile` provides a heuristic, regex-like translation of ASM to Pseudo-C.
 
-*   **`binvis/graph_engine.py`**:
+*   **`BinVis/graph_engine.py`**:
     *   **Class:** `GraphEngine` & `Node`
     *   **Role:** Implements a custom physics simulation (Force-Directed Layout) independent of the rendering library.
     *   **Physics:** Nodes have repulsion; connected edges have spring attraction; global center gravity.
     *   **Data:** Maintains `incoming` and `outgoing` adjacency lists for O(1) lookup.
 
-*   **`binvis/ui/graph_widget.py`**:
+*   **`BinVis/ui/graph_widget.py`**:
     *   **Class:** `GraphWidget` (inherits `QWidget`)
     *   **Role:** High-performance custom rendering using `QPainter`.
     *   **Features:** 60FPS timer for physics, coordinate transformation (World <-> Screen), zoom/pan logic, arrow drawing.
@@ -55,9 +55,9 @@ The project follows a modular structure separating the UI, analysis backend, and
 *   **UI Framework:** PyQt6.
 *   **Graph Lib:** NetworkX (for structure), Custom (for layout/physics).
 *   **Code Style:** Standard Python PEP8.
-*   **Pathing:** Absolute imports rooted at `binvis/`.
+*   **Pathing:** Absolute imports rooted at `BinVis/`.
 
 ## How to Resume
 1.  **Check Dependencies:** Ensure `PyQt6`, `pyelftools`, `capstone`, `networkx` are installed.
-2.  **Run:** Execute `binvis/main.py` to verify the current state.
-3.  **Debug:** Use the `binvis/spaghetti.c` -> `binvis/spaghetti_bin` for quick iteration on graph logic.
+2.  **Run:** Execute `BinVis/main.py` to verify the current state.
+3.  **Debug:** Use the `BinVis/spaghetti.c` -> `BinVis/spaghetti_bin` for quick iteration on graph logic.

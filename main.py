@@ -4,13 +4,19 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox,
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal
 
-# Fix path to allow imports from binvis package
+# Fix path to allow imports from BinVis package
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from binvis.binary_analyzer import BinaryAnalyzer
-from binvis.graph_engine import GraphEngine
-from binvis.ui.graph_widget import GraphWidget
-from binvis.ui.splash import SplashScreen
+try:
+    from BinVis.binary_analyzer import BinaryAnalyzer
+    from BinVis.graph_engine import GraphEngine
+    from BinVis.ui.graph_widget import GraphWidget
+    from BinVis.ui.splash import SplashScreen
+except ImportError:
+    from binary_analyzer import BinaryAnalyzer
+    from graph_engine import GraphEngine
+    from ui.graph_widget import GraphWidget
+    from ui.splash import SplashScreen
 
 class ClickableTextEdit(QTextEdit):
     jump_requested = pyqtSignal(str)
